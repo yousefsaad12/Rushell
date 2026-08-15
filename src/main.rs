@@ -1,3 +1,12 @@
+mod commands;
+mod external;
+mod repl;
+mod tokenizer;
+#[allow(unused_imports)]
+use std::io::{ self, Write };
+
 fn main() {
-    println!("Hello, world!");
+    // TODO: Uncomment the code below to pass the first stage
+
+    repl::run();
 }

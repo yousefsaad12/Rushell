@@ -1,19 +1,23 @@
 pub fn tokenize(input: &str) -> Vec<String> {
     let mut args = Vec::new();
     let mut current_arg = String::new();
-    let mut in_quotes = false;
+    let mut in_single_quotes = false;
+    let mut in_double_quotes = false;
     let mut arg_start = false;
 
     for c in input.chars() {
         match c {
-            '\'' => {
-                in_quotes = !in_quotes;
+            '\'' if !in_double_quotes => {
+                in_single_quotes = !in_single_quotes;
                 arg_start = true;
             }
-            c if c.is_whitespace() && !in_quotes => {
+            '"' if !in_single_quotes => {
+                in_double_quotes = !in_double_quotes;
+                arg_start = true;
+            }
+            c if c.is_whitespace() && !in_single_quotes && !in_double_quotes => {
                 if arg_start {
                     args.push(std::mem::take(&mut current_arg));
-                    current_arg.clear();
                     arg_start = false;
                 }
             }
@@ -23,8 +27,10 @@ pub fn tokenize(input: &str) -> Vec<String> {
             }
         }
     }
+
     if arg_start {
         args.push(current_arg);
     }
+
     args
 }
