@@ -18,12 +18,26 @@ pub fn tokenize(input: &str) -> Vec<String> {
                 arg_start = true;
             }
             '\\' if !in_single_quotes && !in_double_quotes => {
-                // Outside quotes: backslash escapes the very next char literally
                 if let Some(next_c) = chars.next() {
                     current_arg.push(next_c);
                     arg_start = true;
                 }
-                // if there's no next char (trailing backslash), just drop it
+            }
+            '\\' if in_double_quotes => {
+                if let Some(&next_c) = chars.peek() {
+                    match next_c {
+                        '"' | '\\' | '$' | '`' => {
+                            chars.next();
+                            current_arg.push(next_c);
+                        }
+                        _ => {
+                            current_arg.push('\\');
+                        }
+                    }
+                } else {
+                    current_arg.push('\\');
+                }
+                arg_start = true;
             }
             c if c.is_whitespace() && !in_single_quotes && !in_double_quotes => {
                 if arg_start {
