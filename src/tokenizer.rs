@@ -5,7 +5,9 @@ pub fn tokenize(input: &str) -> Vec<String> {
     let mut in_double_quotes = false;
     let mut arg_start = false;
 
-    for c in input.chars() {
+    let mut chars = input.chars().peekable();
+
+    while let Some(c) = chars.next() {
         match c {
             '\'' if !in_double_quotes => {
                 in_single_quotes = !in_single_quotes;
@@ -14,6 +16,13 @@ pub fn tokenize(input: &str) -> Vec<String> {
             '"' if !in_single_quotes => {
                 in_double_quotes = !in_double_quotes;
                 arg_start = true;
+            }
+            '\\' if !in_single_quotes && !in_double_quotes => {
+                // Outside quotes: backslash escapes the very next char literally
+                if let Some(next_c) = chars.next() {
+                    current_arg.push(next_c);
+                    arg_start = true;
+                }
             }
             c if c.is_whitespace() && !in_single_quotes && !in_double_quotes => {
                 if arg_start {
