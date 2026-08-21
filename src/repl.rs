@@ -2,6 +2,7 @@ use std::io::{ self, Write };
 use crate::commands::{ echo, exit, type_cmd, cd, pwd };
 use crate::external::{ finder, executor };
 use crate::tokenizer::tokenize;
+use crate::parser::redirection::parse_redirection;
 
 pub fn run() {
     loop {
@@ -13,10 +14,16 @@ pub fn run() {
         let line = line.trim();
 
         let tokens = tokenize(line);
+        if tokens.is_empty() {
+            continue;
+        }
 
-        let mut parts = tokens.iter();
-        let command = parts.next().map(String::as_str).unwrap_or("");
-        let args: Vec<&str> = parts.map(String::as_str).collect();
+        let parsed_command = parse_redirection(&tokens);
+
+        let command = parsed_command.command;
+        let args = parsed_command.args;
+        let output_redirection = parsed_command.output_redirection;
+
         match command {
             "echo" => echo::run(&args),
             "exit" => exit::run(),

@@ -1,5 +1,6 @@
 mod commands;
 mod external;
+mod parser;
 mod repl;
 mod tokenizer;
 #[allow(unused_imports)]
