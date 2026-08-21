@@ -5,7 +5,7 @@ pub fn run(args: &[&str]) {
     }
 
     if args.len() > 1 {
-        println!("cd: too many arguments");
+        eprintln!("cd: too many arguments");
         return;
     }
 
@@ -19,6 +19,6 @@ pub fn run(args: &[&str]) {
     if new_path.exists() {
         env::set_current_dir(new_path).unwrap();
     } else {
-        println!("cd: {}: No such file or directory", args[0]);
+        eprintln!("cd: {}: No such file or directory", args[0]);
     }
 }

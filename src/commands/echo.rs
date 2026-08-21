@@ -1,3 +1,3 @@
-pub fn run(args: &[&str]) {
-    println!("{}", args.join(" "));
+pub fn run(args: &[&str]) -> String {
+    args.join(" ")
 }
