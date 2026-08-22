@@ -9,6 +9,7 @@ pub fn run(
     command: &str,
     args: &[&str],
     output_redirection: Option<&str>,
+    output_append: bool,
     error_redirection: Option<&str>
 ) {
     let mut cmd = Command::new(path);
@@ -18,7 +19,8 @@ pub fn run(
             let file = OpenOptions::new()
                 .write(true)
                 .create(true)
-                .truncate(true)
+                .append(output_append)
+                .truncate(!output_append)
                 .open(file_path)
                 .expect("failed to open output file");
             cmd.stdout(Stdio::from(file));

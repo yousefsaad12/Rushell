@@ -50,8 +50,9 @@ pub fn run() {
                             &path,
                             command,
                             args,
-                            parsed_command.output_redirection.as_deref(),
-                            parsed_command.error_redirection.as_deref()
+                            parsed_command.output_redirection,
+                            parsed_command.output_append,
+                            parsed_command.error_redirection
                         );
 
                         None
@@ -68,7 +69,8 @@ pub fn run() {
                     let mut file = OpenOptions::new()
                         .write(true)
                         .create(true)
-                        .truncate(true)
+                        .append(parsed_command.output_append)
+                        .truncate(!parsed_command.output_append)
                         .open(path)
                         .expect("failed to open output file");
 
