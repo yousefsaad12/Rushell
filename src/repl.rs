@@ -50,7 +50,8 @@ pub fn run() {
                             &path,
                             command,
                             args,
-                            parsed_command.output_redirection.as_deref()
+                            parsed_command.output_redirection.as_deref(),
+                            parsed_command.error_redirection.as_deref()
                         );
 
                         None
