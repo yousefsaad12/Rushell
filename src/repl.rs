@@ -1,8 +1,7 @@
-use std::fs::OpenOptions;
 use std::io::{ self, Write };
 
-use crate::commands::{ cd, echo, exit, pwd, type_cmd };
-use crate::external::{ executor, finder };
+use crate::builtin::{ execute_builtin, execute_external };
+use crate::output_handler::handle_output;
 use crate::parser::redirection::parse_redirection;
 use crate::tokenizer::tokenize;
 
@@ -27,60 +26,18 @@ pub fn run() {
         let command = parsed_command.command;
         let args = &parsed_command.args;
 
-        let output: Option<String> = match command {
-            "echo" => Some(echo::run(args)),
-
-            "exit" => exit::run(),
-
-            "type" => { Some(type_cmd::run(args.first().copied().unwrap_or(""))) }
-
-            "pwd" => Some(pwd::run()),
-
-            "cd" => {
-                cd::run(args);
-                None
-            }
-
-            "" => None,
-
-            _ => {
-                match finder::find_exe(command) {
-                    Some(path) => {
-                        executor::run(
-                            &path,
-                            command,
-                            args,
-                            parsed_command.output_redirection,
-                            parsed_command.output_append,
-                            parsed_command.error_redirection
-                        );
-
-                        None
-                    }
-
-                    None => { Some(format!("{}: command not found", command)) }
-                }
-            }
+        let output = match execute_builtin(command, args) {
+            Some(output) => output,
+            None => execute_external(
+                command,
+                args,
+                parsed_command.output_redirection,
+                parsed_command.output_append,
+                parsed_command.error_redirection,
+                parsed_command.error_append
+            )
         };
 
-        if let Some(text) = output {
-            match parsed_command.output_redirection.as_deref() {
-                Some(path) => {
-                    let mut file = OpenOptions::new()
-                        .write(true)
-                        .create(true)
-                        .append(parsed_command.output_append)
-                        .truncate(!parsed_command.output_append)
-                        .open(path)
-                        .expect("failed to open output file");
-
-                    writeln!(file, "{}", text).expect("failed to write output");
-                }
-
-                None => {
-                    println!("{}", text);
-                }
-            }
-        }
+        handle_output(output, &parsed_command);
     }
 }
