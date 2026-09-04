@@ -1,9 +1,10 @@
-use rustyline::completion::{Completer, Pair};
+use rustyline::completion::{ Completer, Pair };
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::history::DefaultHistory;
 use rustyline::validate::Validator;
-use rustyline::{Context, Editor, Helper};
+use rustyline::{ Context, Editor, Helper };
+use crate::external::finder;
 
 const BUILTINS: [&str; 5] = ["cd", "echo", "exit", "pwd", "type"];
 
@@ -16,19 +17,26 @@ impl Completer for BuiltinCompleter {
         &self,
         line: &str,
         pos: usize,
-        _context: &Context<'_>,
+        _context: &Context<'_>
     ) -> rustyline::Result<(usize, Vec<Pair>)> {
         let before_cursor = &line[..pos];
         if before_cursor.contains(char::is_whitespace) {
             return Ok((pos, Vec::new()));
         }
 
-        let candidates = BUILTINS
-            .iter()
+        let mut candidates: Vec<String> = BUILTINS.iter()
             .filter(|builtin| builtin.starts_with(before_cursor))
-            .map(|builtin| Pair {
-                display: (*builtin).to_string(),
-                replacement: (*builtin).to_string(),
+            .map(|builtin| (*builtin).to_string())
+            .collect();
+        candidates.extend(finder::find_executables(before_cursor));
+        candidates.sort();
+        candidates.dedup();
+
+        let candidates = candidates
+            .into_iter()
+            .map(|candidate| Pair {
+                display: candidate.clone(),
+                replacement: candidate,
             })
             .collect();
 
