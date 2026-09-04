@@ -1,15 +1,28 @@
-use std::io::{ self, Write };
-use crate::commands::{ echo, exit, type_cmd, cd, pwd };
-use crate::external::{ finder, executor };
+use crate::commands::{cd, echo, exit, pwd, type_cmd};
+use crate::completion;
+use crate::external::{executor, finder};
 use crate::tokenizer::tokenize;
+use rustyline::error::ReadlineError;
 
 pub fn run() {
-    loop {
-        print!("$ ");
-        io::stdout().flush().unwrap();
+    let mut editor = completion::new_editor().expect("failed to initialize line editor");
 
-        let mut line = String::new();
-        io::stdin().read_line(&mut line).unwrap();
+    loop {
+        let line = match editor.readline("$ ") {
+            Ok(line) => {
+                if !line.trim().is_empty() {
+                    let _ = editor.add_history_entry(line.as_str());
+                }
+                line
+            }
+            Err(ReadlineError::Interrupted | ReadlineError::Eof) => {
+                break;
+            }
+            Err(error) => {
+                eprintln!("readline error: {error}");
+                break;
+            }
+        };
         let line = line.trim();
 
         let tokens = tokenize(line);
@@ -24,12 +37,10 @@ pub fn run() {
             "pwd" => pwd::run(),
             "cd" => cd::run(&args),
             "" => {}
-            _ => {
-                match finder::find_exe(command) {
-                    Some(path) => executor::run(&path, command, args),
-                    None => println!("{}: command not found", command),
-                }
-            }
+            _ => match finder::find_exe(command) {
+                Some(path) => executor::run(&path, command, args),
+                None => println!("{}: command not found", command),
+            },
         }
     }
 }

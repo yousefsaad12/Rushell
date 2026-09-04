@@ -1,5 +1,5 @@
+pub mod cd;
 pub mod echo;
 pub mod exit;
-pub mod type_cmd;
 pub mod pwd;
-pub mod cd;
+pub mod type_cmd;
