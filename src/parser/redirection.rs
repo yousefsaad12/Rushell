@@ -8,7 +8,7 @@ pub struct ParsedCommand<'a> {
 }
 
 pub fn parse_redirection<'a>(tokens: &'a [String]) -> ParsedCommand<'a> {
-    let command = tokens[0].as_str();
+    let command = tokens.first().map(String::as_str).unwrap_or("");
     let mut args = Vec::new();
     let mut output_redirection = None;
     let mut output_append = false;
@@ -58,5 +58,12 @@ pub fn parse_redirection<'a>(tokens: &'a [String]) -> ParsedCommand<'a> {
         }
     }
 
-    ParsedCommand { command, args, output_redirection, output_append, error_redirection, error_append }
+    ParsedCommand {
+        command,
+        args,
+        output_redirection,
+        output_append,
+        error_redirection,
+        error_append,
+    }
 }

@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::env;
 use std::fs::Metadata;
 use std::os::unix::fs::PermissionsExt;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 fn is_executable(metadata: &Metadata) -> bool {
     metadata.is_file() && (metadata.permissions().mode() & 0o111) != 0
