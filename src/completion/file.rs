@@ -1,30 +1,18 @@
 use rustyline::completion::Pair;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub fn complete(prefix: &str) -> (usize, Vec<Pair>) {
-    let path = Path::new(prefix);
-    let directory = path
-        .parent()
-        .filter(|directory| !directory.as_os_str().is_empty())
-        .unwrap_or_else(|| Path::new("."));
-    let file_prefix = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .unwrap_or("");
-    let display_directory = if directory == Path::new(".") {
-        String::new()
-    } else if directory == Path::new("/") {
-        "/".to_string()
-    } else {
-        format!("{}/", directory.to_string_lossy())
+    let (directory_prefix, file_prefix) = match prefix.rfind('/') {
+        Some(index) => (&prefix[..=index], &prefix[index + 1..]),
+        None => ("", prefix),
     };
-    let read_directory = if directory.as_os_str().is_empty() {
+    let directory = if directory_prefix.is_empty() {
         PathBuf::from(".")
     } else {
-        directory.to_path_buf()
+        PathBuf::from(directory_prefix)
     };
 
-    let Ok(entries) = std::fs::read_dir(read_directory) else {
+    let Ok(entries) = std::fs::read_dir(&directory) else {
         return (prefix.len(), Vec::new());
     };
 
@@ -36,12 +24,11 @@ pub fn complete(prefix: &str) -> (usize, Vec<Pair>) {
                 return None;
             }
 
-            let candidate_path = entry.path();
-            let candidate = format!("{display_directory}{name}");
-            let replacement = if candidate_path.is_dir() {
-                format!("{candidate}/")
+            let candidate = format!("{directory_prefix}{name}");
+            let replacement = if entry.path().is_dir() {
+                format!("{name}/")
             } else {
-                format!("{candidate} ")
+                format!("{name} ")
             };
             Some(Pair {
                 display: candidate,

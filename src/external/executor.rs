@@ -1,7 +1,7 @@
 use std::io;
 use std::os::unix::process::CommandExt;
 use std::path::Path;
-use std::process::{ Command, Stdio };
+use std::process::{Command, Stdio};
 
 use crate::redirection::create_redirect_file;
 
@@ -12,7 +12,7 @@ pub fn run(
     output_redirection: Option<&str>,
     output_append: bool,
     error_redirection: Option<&str>,
-    error_append: bool
+    error_append: bool,
 ) -> io::Result<()> {
     let mut cmd = Command::new(path);
 
