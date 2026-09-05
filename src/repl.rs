@@ -1,5 +1,5 @@
 use crate::completion;
-use crate::execution::{execute_builtin, execute_external, handle};
+use crate::execution::{ execute_builtin, execute_external, handle };
 use crate::parser::redirection::parse_redirection;
 use crate::tokenizer::tokenize;
 use rustyline::error::ReadlineError;
@@ -34,14 +34,15 @@ pub fn run() {
 
         let output = match execute_builtin(command, args) {
             Some(output) => output,
-            None => execute_external(
-                command,
-                args,
-                parsed_command.output_redirection,
-                parsed_command.output_append,
-                parsed_command.error_redirection,
-                parsed_command.error_append,
-            ),
+            None =>
+                execute_external(
+                    command,
+                    args,
+                    parsed_command.output_redirection,
+                    parsed_command.output_append,
+                    parsed_command.error_redirection,
+                    parsed_command.error_append
+                ),
         };
 
         handle(output, &parsed_command);
