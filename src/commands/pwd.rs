@@ -1,5 +1,5 @@
 use std::env;
-pub fn run() {
+pub fn run() -> String {
     let current_dir = env::current_dir().unwrap();
-    println!("{}", current_dir.display());
+    current_dir.display().to_string()
 }
