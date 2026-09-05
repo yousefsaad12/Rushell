@@ -29,19 +29,4 @@ pub fn run(
             cmd.stdout(Stdio::inherit());
         }
     }
-
-    match error_redirection {
-        Some(file_path) => {
-            let file = create_redirect_file(file_path, error_append)
-                .expect("failed to open error file");
-
-            cmd.stderr(Stdio::from(file));
-        }
-
-        None => {
-            cmd.stderr(Stdio::inherit());
-        }
-    }
-
-    cmd.status().expect("failed to execute command");
 }
